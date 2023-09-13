@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="">
+<head>
+<!--    Required meta tags-->
+    <meta charset="UTF-8">
+    <meta name="viewport"  content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!--    Bootstrap CSS-->
+    <link rel="stylesheet" type="text/css" th:href="@{/bootstrap.min.css}">
+<!--    sbb CSS-->
+    <title>Hello, sbb!</title>
+    <!-- JQuery + csrf -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g="
+            crossorigin="anonymous"></script>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <meta name="_csrf" th:content="${_csrf.token}">
+
+    <!-- 폰트어썸 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- 마크다운 에디터-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+
+
+
+    <style>
+        a {
+            color:inherit;
+            text-decoration:inherit;
+        }
+    </style>
+
+
+</head>
+<body>
+<!--<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">-->
+<!--    <div class="container-fluid">-->
+<!--        <a class="navbar-brand" href="/">SBB</a>-->
+<!--        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"-->
+<!--                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">-->
+<!--                <span class="navbar-toggler-icon">-->
+<!--                </span>-->
+<!--        </button>-->
+<!--        <div class="collapse navbar-collapse" id="navbarSupportedContent">-->
+<!--            <ul class="navbar-nav me-auto mb2 mb-lg-0">-->
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link" href="#">로그인</a>-->
+<!--                </li>-->
+<!--            </ul>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</nav>-->
+<!--네비게이션바-->
+<nav th:replace="~{navbar :: navbarFragment}"></nav>
+<!--기본 템플릿 안에 삽일될 내용 Start-->
+<main layout:fragment="content"></main>
+<!--기본 템플릿 안에 삽입될 내용 End-->
+<!--Bootstrap JS-->
+<script th:src="@{/bootstrap.min.js}"></script>
+<!--자바 스크립트 Start-->
+<th:block layout:fragment="script"></th:block>
+<!--자바 스크립트 End-->
+</body>
+</html>
