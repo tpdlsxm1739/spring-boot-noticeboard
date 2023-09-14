@@ -81,6 +81,11 @@ public class UserService {
 
         return generatedString;
     }
+    @Transactional
+    public void updatePassWord(SiteUser user, String newPassword) {
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
 
 
 

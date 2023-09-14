@@ -2,6 +2,7 @@ package com.mysite.sbb.controller;
 
 
 import com.mysite.sbb.DataNotFoundException;
+import com.mysite.sbb.Form.PWChangeForm;
 import com.mysite.sbb.Form.UserPWFindForm;
 import com.mysite.sbb.Service.AnswerService;
 import com.mysite.sbb.Service.QuestionService;
@@ -14,6 +15,7 @@ import com.mysite.sbb.Form.UserCreateForm;
 import com.mysite.sbb.Service.UserService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -35,8 +37,8 @@ public class UserController {
 
     private final UserService userService;
     private final QuestionService questionService;
-
     private final AnswerService answerService;
+    private final PasswordEncoder passwordEncoder;
 
     @GetMapping("/signup")
     public String signup(UserCreateForm userCreateForm) {
@@ -107,10 +109,12 @@ public class UserController {
 
     @PreAuthorize("isAnonymous()")
     @PostMapping("/pw_find")
-    public String findPassWord(Model model, UserPWFindForm userPWFindForm, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
-        if(bindingResult.hasErrors()) {
-            return "pw_find";
+    public String findPassWord(Model model, @Valid UserPWFindForm userPWFindForm, BindingResult bindingResult,
+                               RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            return "user/pw_find";
         }
+
 
         SiteUser user = userService.getUser(userPWFindForm.getUsername());
 
@@ -135,7 +139,40 @@ public class UserController {
 
         return "redirect:/user/login";
     }
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/change/passwd")
+    public String showChangePW(@ModelAttribute("pwChangeForm") PWChangeForm pwChangeForm) {
+        return "pw_change";
+    }
 
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/change/passwd")
+    public String changePW(@Valid @ModelAttribute("pwChangeForm") PWChangeForm pwChangeForm, BindingResult bindingResult, Model model,
+                           Principal principal, RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            return "pw_change";
+        }
+
+        SiteUser user = userService.getUser(principal.getName());
+
+        // 이전 패스워드와 맞지 않을경우
+        if (!passwordEncoder.matches(pwChangeForm.getPrePassword(), user.getPassword())) {
+            bindingResult.reject("notMatchPW", "이전 비밀번호가 일치하지 않습니다.");
+            return "pw_change";
+        }
+        // 새 비밀번호, 비밀번호 확인 창 일치하지 않을경우
+        if (!pwChangeForm.getNewPassword1().equals(pwChangeForm.getNewPassword2())) {
+            bindingResult.reject("notMatchNewPW", "새 비밀번호와 확인이 일치하지 않습니다.");
+            return "pw_change";
+        }
+
+        userService.updatePassWord(user, pwChangeForm.getNewPassword1());
+
+        // 로그인 페이지에서 보여줄 성공 메시지를 플래시 애트리뷰트로 추가
+        redirectAttributes.addFlashAttribute("successMessage", "비밀번호 변경 성공!");
+
+        return "redirect:/user/mypage";
+    }
 
     }
 
