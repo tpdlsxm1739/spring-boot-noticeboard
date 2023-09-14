@@ -1,4 +1,4 @@
-<html layout:decorate="~{layout}">
+<html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml">
 <main layout:fragment="content" class="container my-3">
     <form th:action method="post" th:object="${userPWFindForm}" onsubmit="FindPasswordForm__submit(this); return false;">
         <div th:replace="~{/form_errors :: formErrorsFragment}"></div>
