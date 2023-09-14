@@ -2,6 +2,7 @@ package com.mysite.sbb.controller;
 
 
 import com.mysite.sbb.DataNotFoundException;
+import com.mysite.sbb.Form.UserPWFindForm;
 import com.mysite.sbb.Service.AnswerService;
 import com.mysite.sbb.Service.QuestionService;
 import com.mysite.sbb.entity.Answer;
@@ -98,6 +99,43 @@ public class UserController {
 
             return "my_page";
         }
+    @PreAuthorize("isAnonymous()")
+    @GetMapping("/pw_find")
+    public String showFindPassWord(UserPWFindForm userPWFindForm) {
+        return "pw_find";
+    }
+
+    @PreAuthorize("isAnonymous()")
+    @PostMapping("/pw_find")
+    public String findPassWord(Model model, UserPWFindForm userPWFindForm, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+        if(bindingResult.hasErrors()) {
+            return "pw_find";
+        }
+
+        SiteUser user = userService.getUser(userPWFindForm.getUsername());
+
+        if(user == null) {
+            bindingResult.reject("notFindUser", "일치하는 사용자가 없습니다.");
+            return "pw_find";
+        }
+
+        if(!user.getEmail().equals(userPWFindForm.getEmail())){
+            bindingResult.reject("notCorrectEmail", "등록된 회원 정보와 이메일이 다릅니다.");
+            return "pw_find";
+        }
+
+        String tempPW = userService.setTemporaryPW(user);
+
+        // 이메일 전송
+        // @Async 붙은 메서드는 동일한 클래스에서 호출할 수 없기에 컨트롤러에서 메일 발송 요청
+        userService.sendEmail(userPWFindForm.getEmail(), user.getUsername(), tempPW);
+
+        // 로그인 페이지에서 보여줄 성공 메시지를 플래시 애트리뷰트로 추가
+        redirectAttributes.addFlashAttribute("successMessage", "임시 비밀번호가 이메일로 전송되었습니다. 이메일 확인 후 로그인 해주세요.");
+
+        return "redirect:/user/login";
+    }
+
 
     }
 

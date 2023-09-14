@@ -9,6 +9,8 @@ import com.mysite.sbb.entity.Question;
 import com.mysite.sbb.entity.SiteUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -21,13 +23,16 @@ import java.security.Principal;
 import java.util.List;
 
 @RequestMapping("/answer")
-@RequiredArgsConstructor
 @Controller
+@RequiredArgsConstructor
 public class AnswerController {
 
     private final QuestionService questionService;
     private final AnswerService answerService;
     private final UserService userService;
+
+
+
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/create/{id}")

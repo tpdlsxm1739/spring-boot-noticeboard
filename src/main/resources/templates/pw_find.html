@@ -1,6 +1,6 @@
-<html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml">
+<html layout:decorate="~{layout}">
 <main layout:fragment="content" class="container my-3">
-    <form th:action method="post" th:object="${UserPWFindForm}" onsubmit="FindPasswordForm__submit(this); return false;">
+    <form th:action method="post" th:object="${userPWFindForm}" onsubmit="FindPasswordForm__submit(this); return false;">
         <div th:replace="~{/form_errors :: formErrorsFragment}"></div>
         <h2 class="border-bottom py-2">비밀번호 찾기</h2>
         <div class="mb-3">
