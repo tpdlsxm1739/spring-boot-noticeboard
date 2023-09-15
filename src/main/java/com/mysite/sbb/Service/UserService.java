@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 import java.util.Random;
@@ -31,9 +32,23 @@ public class UserService {
 
     @Transactional
     public SiteUser create(String username, String email, String password) {
+        return join("SBB", username, email, password);
+    }
+
+    private SiteUser join(String providerTypeCode, String username, String email, String password) {
+        if (getUser(username) !=null) {
+            throw new RuntimeException("해당 ID는 이미 사용중입니다.");
+        }
+
+        // 소셜 로그인의 경우 아이디가 게시판에 노출되므로, 비번 없는 공백 알고 혹시 모를 공격 방어
+        if(!providerTypeCode.equals("SBB")) {
+            password = createRandomPassword();
+        }
+
         SiteUser user = new SiteUser();
         user.setUsername(username);
         user.setEmail(email);
+        user.setProviderTypeCode(providerTypeCode);
         user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
         return user;
@@ -44,7 +59,7 @@ public class UserService {
         if (siteUser.isPresent()) {
             return siteUser.get();
         } else {
-            throw new DataNotFoundException("siteuser not found");
+            return null;
         }
     }
     @Transactional
@@ -86,6 +101,15 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
+    @Transactional
+    public SiteUser whenSocialLogin(String providerTypeCode, String username) {
+        SiteUser siteUser = getUser(username);
+
+        if (siteUser != null) return siteUser;
+
+        return join(providerTypeCode, username, "", "");
+    }
+
 
 
 

@@ -30,6 +30,8 @@ public class NotProd {
                 SiteUser user1 = userService.create("user1", "user1@test.com", "1234");
                 SiteUser user2 = userService.create("user2", "user2@test.com", "1234");
                 SiteUser user3 = userService.create("puar12", "r4560798@naver.com", "1234");
+                SiteUser user4ByKakao = userService.whenSocialLogin("KAKAO", "KAKAO__2957634751");
+                SiteUser user5ByKakao = userService.whenSocialLogin("GOOGLE", "GOOGLE__116304245007543902962");
                 for (int i = 1; i <= 300; i++) {
                     String subject = String.format("테스트 데이터입니다:[%03d]", i);
                     String content = "내용무";
