@@ -7,9 +7,14 @@ import com.mysite.sbb.entity.Question;
 import com.mysite.sbb.entity.SiteUser;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -68,6 +73,29 @@ public class AnswerService {
 
     public List<Answer> getAnswerTop15Latest() {
         return answerRepository.findTop15ByOrderByCreateDateDesc();
+
     }
+    public Page<Answer> getAnswerPage(Question question, int page, String sort) {
+        Pageable pageable;
+
+        // 최신순
+        if (sort.equals("createDate")) {
+            List<Sort.Order> sorts = new ArrayList<>();
+            sorts.add(Sort.Order.desc("createDate"));
+            pageable = PageRequest.of(page, 10, Sort.by(sorts)); //페이지 번호, 개수
+            return answerRepository.findAllByQuestion(question, pageable);
+        }
+
+        // 추천순, 기본
+        else {
+            pageable = PageRequest.of(page, 10); // 페이지네이션 정보
+            // 추천순 : 10개에 페이지정보만 주면 알아서
+            if (sort.equals("voter"))
+                return answerRepository.findAllByQuestionOrderByVoter(question, pageable);
+            // 기본
+            return answerRepository.findAllByQuestion(question, pageable);
+        }
+    }
+
 
 }

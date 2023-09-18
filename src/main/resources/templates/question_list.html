@@ -14,59 +14,60 @@
         </ul>
     </div>
     <div class="flex-grow-1">
-    <div class="row my-3">
-        <h3 class="border-bottom py-2" th:if="${boardName == 0}">질문과답변</h3>
-        <h3 class="border-bottom py-2" th:if="${boardName == 1}">자유게시판</h3>
-        <h3 class="border-bottom py-2"  th:if="${boardName == 2}">버그및건의</h3>
-        <div class="col-6">
-            <!-- 현재 페이지 주소에 따라 질문 등록하기 링크 동적 생성 -->
-            <a onclick="createQuestion(event)" class="btn btn-primary"
-               th:if="${boardName == 0}">질문과답변 등록</a>
-            <a onclick="createQuestion(event)" class="btn btn-primary"
-               th:if="${boardName == 1}">자유게시판 등록</a>
-            <a onclick="createQuestion(event)" class="btn btn-primary"
-               th:if="${boardName == 2}">버그및건의 등록</a>
+        <div class="row my-3">
+            <h3 class="border-bottom py-2" th:if="${boardName == 0}">질문과답변</h3>
+            <h3 class="border-bottom py-2" th:if="${boardName == 1}">자유게시판</h3>
+            <h3 class="border-bottom py-2" th:if="${boardName == 2}">버그및건의</h3>
+            <div class="col-6">
+                <a onclick="createQuestion(event)" class="btn btn-primary"
+                   th:if="${boardName == 0}">질문과답변 등록</a>
+                <a onclick="createQuestion(event)" class="btn btn-primary"
+                   th:if="${boardName == 1}">자유게시판 등록</a>
+                <a onclick="createQuestion(event)" class="btn btn-primary"
+                   th:if="${boardName == 2}">버그및건의 등록</a>
             </div>
-        <div class="col-6">
-            <div class="input-group">
-                <input type="text" name="kw" class="form-control" th:value="${param.kw}">
-                <button class="btn btn-outline-secondary" id="btn_search">찾기</button>
+            <div class="col-6">
+                <form>
+                    <div class="input-group">
+                        <input type="text" name="kw" class="form-control" th:value="${param.kw}">
+                        <button class="btn btn-outline-secondary" id="btn_search">찾기</button>
+                    </div>
+                </form>
             </div>
         </div>
-    </div>
-    <table class="table">
-        <thead class="table-dark">
-        <tr class="text-center">
-            <th>번호</th>
-            <th style="width:50%">제목</th>
-            <th>글쓴이</th>
-            <th>작성일시</th>
-            <th>조회수</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr class="text-center" th:each="question, loop : ${paging}">
-            <td th:text="${paging.getTotalElements - (paging.number * paging.size) - loop.index}"></td>
-            <td class="text-start">
-                <a href="javascript:;" th:data-question-id="${question.id}"
-                   onclick="showQuestionDetail(this.getAttribute('data-question-id'));"
-                   th:text="${question.subject}"></a>
-                <span class="text-danger small ms-2" th:if="${#lists.size(question.answerList) > 0}"
-                      th:text="${#lists.size(question.answerList)}">
-			        </span>
-            </td>
-            <td>
+        <table class="table">
+            <thead class="table-dark">
+            <tr class="text-center">
+                <th>번호</th>
+                <th style="width:50%">제목</th>
+                <th>글쓴이</th>
+                <th>작성일시</th>
+                <th>조회수</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="text-center" th:each="question, loop : ${paging}">
+                <td class="text-start">
+                    <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
+                    <span class="text-danger small ms-2"
+                          th:if="${#lists.size(question.answerList) > 0}"
+                          th:text="${#lists.size(question.answerList)}">
+                 </span>
+                </td>
+                <td>
+                    <span th:if="${question.author != null}" }>
                      <span th:if="${#strings.length(question.author.username) <= 10}"
                            th:text="${question.author.username}"></span>
-                <span th:unless="${#strings.length(question.author.username) <= 10}"
-                      th:text="${question.author.username.substring(0, 10)} + '...'"></span>
-            </td>
-            <td th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></td>
-            <td th:text="${question.view}"></td>
-        </tr>
-        </tbody>
-    </table>
-    <!-- 페이징처리 시작 -->
+                    <span th:unless="${#strings.length(question.author.username) <= 10}"
+                          th:text="${question.author.username.substring(0, 10)} + '...'"></span>
+                        </span>
+                </td>
+                <td th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></td>
+                <td th:text="${question.view}"></td>
+            </tr>
+            </tbody>
+        </table>
+        <!-- 페이징처리 시작 -->
         <div th:if="${!paging.isEmpty()}" th:with="queryStrBase = '?kw=' + ${param.kw != null ? param.kw : ''}">
             <ul class="pagination justify-content-center">
                 <li class="page-item" th:classappend="${paging.number==0} ? 'disabled'">
@@ -100,86 +101,8 @@
                 </li>
             </ul>
         </div>
-    <!-- 페이징처리 끝 -->
-    <form th:action="@{/question/list}" method="get" id="searchForm">
-        <input type="hidden" id="kw" name="kw" th:value="${kw}">
-        <input type="hidden" id="page" name="page" th:value="${paging.number}">
-    </form>
-<script layout:fragment="script" type='text/javascript'>
-    const page_elements = document.getElementsByClassName("page-link");
-    Array.from(page_elements).forEach(function(element) {
-        element.addEventListener('click', function() {
-            document.getElementById('page').value = this.dataset.page;
-            document.getElementById('searchForm').submit();
-        });
-    });
-    const btn_search = document.getElementById("btn_search");
-    btn_search.addEventListener('click', function() {
-        document.getElementById('kw').value = document.getElementById('search_kw').value;
-        document.getElementById('page').value = 0;  // 검색버튼을 클릭할 경우 0페이지부터 조회한다.
-        document.getElementById('searchForm').submit();
-    });
-</script>
-
-<script th:inline="javascript">
-
-    // 로컬스토리지에 해당 게시글 읽은적이 있는지 검사
-    function checkIdInLocalStorage(id) {
-        const visitedPosts = JSON.parse(localStorage.getItem("visitedPosts") || "[]");
-        return visitedPosts.includes(id);
-    }
-
-    // 로컬스토리지에 방문 게시글 번호 추가
-    // null 일 경우 []값이 들어가고, push로 id넣고 새로 세팅(맨 처음)
-    function addIdToLocalStorage(id) {
-        const visitedPosts = JSON.parse(localStorage.getItem("visitedPosts") || "[]");
-        visitedPosts.push(id);
-        localStorage.setItem("visitedPosts", JSON.stringify(visitedPosts));
-    }
-
-    const showQuestionDetail = (questionId) => {
-        const isVisited = checkIdInLocalStorage(questionId);
-
-        if (!isVisited) {
-            addIdToLocalStorage(questionId);
-            $.ajax({
-                // 요청방식: get
-                type: "get",
-                url: "/question/detail",
-                data: {
-                    "questionId": questionId,
-                    "isVisited" : false
-                },
-                success: function (fragment) {
-                    // 성공 시 리다이렉트 url을 받으므로, 이동
-                    location.href=fragment;
-                },
-                error: function (err) {
-                    console.log("요청 실패", err);
-                }
-            });
-        }
-        else {
-            $.ajax({
-                type: "get",
-                url: "/question/detail",
-                data: {
-                    "questionId": questionId,
-                    "isVisited" : true
-                },
-                success: function (fragment) {
-                    // 성공 시 리다이렉트 url을 받으므로, 이동
-                    location.href=fragment;
-                },
-                error: function (err) {
-                    console.log("요청 실패", err);
-                }
-            });
-        }
-    }
-</script>
+        <!-- 페이징처리 끝 -->
     </div>
-
     <script th:inline="javascript">
         const createQuestion = (event) => {
             event.preventDefault(); // 호출된 이벤트의 기본 작동 방식 중단
@@ -189,7 +112,46 @@
             createQuestionLink.setAttribute('href', newPath);  // 사용자가 클릭한 요소의 속성 설정
             window.location.href = newPath;
         }
-    </script>
 
+        const showQuestionDetail = (questionId) => {
+            const isVisited = checkIdInLocalStorage(questionId);
+
+            if (!isVisited) {
+                addIdToLocalStorage(questionId);
+                $.ajax({
+                    // 요청방식: get
+                    type: "get",
+                    url: "/question/detail",
+                    data: {
+                        "questionId": questionId,
+                        "isVisited": false
+                    },
+                    success: function (fragment) {
+                        // 성공 시 리다이렉트 url을 받으므로, 이동
+                        location.href = fragment;
+                    },
+                    error: function (err) {
+                        console.log("요청 실패", err);
+                    }
+                });
+            } else {
+                $.ajax({
+                    type: "get",
+                    url: "/question/detail",
+                    data: {
+                        "questionId": questionId,
+                        "isVisited": true
+                    },
+                    success: function (fragment) {
+                        // 성공 시 리다이렉트 url을 받으므로, 이동
+                        location.href = fragment;
+                    },
+                    error: function (err) {
+                        console.log("요청 실패", err);
+                    }
+                });
+            }
+        }
+    </script>
 </main>
 </html>
