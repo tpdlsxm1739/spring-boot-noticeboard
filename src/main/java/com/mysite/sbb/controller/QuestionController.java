@@ -55,18 +55,23 @@ public class QuestionController {
         return "question_list";
     }
 
-    @GetMapping("/detail")
+
+    @GetMapping("/")
+    public String root() {
+        return "redirect:/question/list";
+    }
+
+    @GetMapping("/increase")
     @ResponseBody
-    public String viewCheck(Model model, @RequestParam Integer questionId, @RequestParam Boolean isVisited, AnswerForm answerForm) {
+    public String increaseHit(Integer questionId, @RequestParam(required = false) Boolean isVisited) {
         Question question = questionService.getQuestion(questionId);
 
         // 방문한 적이 없을때만 조회수 증가
-        if(!isVisited) {
+        if (isVisited != null && !isVisited) {
             questionService.updateQuestionView(question);
         }
+            return Integer.toString(question.getView());
 
-        // Ajax에 리다이렉트 url 알려주기
-        return "/question/detail/%d".formatted(questionId);
     }
 
     @GetMapping(value = "/detail/{id}")
@@ -78,6 +83,8 @@ public class QuestionController {
         model.addAttribute("paging", paging);
         return "question_detail";
     }
+
+
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/create/{type}")
