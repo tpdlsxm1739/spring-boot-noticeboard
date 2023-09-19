@@ -19,11 +19,11 @@
             <h3 class="border-bottom py-2" th:if="${boardName == 1}">자유게시판</h3>
             <h3 class="border-bottom py-2" th:if="${boardName == 2}">버그및건의</h3>
             <div class="col-6">
-                <a onclick="createQuestion(event)" class="btn btn-primary"
+                <a th:href="@{/question/create/qna}" class="btn btn-primary"
                    th:if="${boardName == 0}">질문과답변 등록</a>
-                <a onclick="createQuestion(event)" class="btn btn-primary"
+                <a th:href="@{/question/create/free}" class="btn btn-primary"
                    th:if="${boardName == 1}">자유게시판 등록</a>
-                <a onclick="createQuestion(event)" class="btn btn-primary"
+                <a th:href="@{/question/create/bug}" class="btn btn-primary"
                    th:if="${boardName == 2}">버그및건의 등록</a>
             </div>
             <div class="col-6">
@@ -47,15 +47,16 @@
             </thead>
             <tbody>
             <tr class="text-center" th:each="question, loop : ${paging}">
+                <td th:text="${paging.getTotalElements - (paging.number * paging.size) - loop.index}"></td>
                 <td class="text-start">
                     <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
                     <span class="text-danger small ms-2"
                           th:if="${#lists.size(question.answerList) > 0}"
                           th:text="${#lists.size(question.answerList)}">
-                 </span>
+                </span>
                 </td>
                 <td>
-                    <span th:if="${question.author != null}" }>
+                    <span th:if="${question.author != null}">
                      <span th:if="${#strings.length(question.author.username) <= 10}"
                            th:text="${question.author.username}"></span>
                     <span th:unless="${#strings.length(question.author.username) <= 10}"
@@ -103,55 +104,5 @@
         </div>
         <!-- 페이징처리 끝 -->
     </div>
-    <script th:inline="javascript">
-        const createQuestion = (event) => {
-            event.preventDefault(); // 호출된 이벤트의 기본 작동 방식 중단
-            const createQuestionLink = event.target; // 사용자가 클릭한 요소
-            const currentPath = window.location.pathname;
-            const newPath = currentPath.replace('/question/list/', '/question/create/');
-            createQuestionLink.setAttribute('href', newPath);  // 사용자가 클릭한 요소의 속성 설정
-            window.location.href = newPath;
-        }
-
-        const showQuestionDetail = (questionId) => {
-            const isVisited = checkIdInLocalStorage(questionId);
-
-            if (!isVisited) {
-                addIdToLocalStorage(questionId);
-                $.ajax({
-                    // 요청방식: get
-                    type: "get",
-                    url: "/question/detail",
-                    data: {
-                        "questionId": questionId,
-                        "isVisited": false
-                    },
-                    success: function (fragment) {
-                        // 성공 시 리다이렉트 url을 받으므로, 이동
-                        location.href = fragment;
-                    },
-                    error: function (err) {
-                        console.log("요청 실패", err);
-                    }
-                });
-            } else {
-                $.ajax({
-                    type: "get",
-                    url: "/question/detail",
-                    data: {
-                        "questionId": questionId,
-                        "isVisited": true
-                    },
-                    success: function (fragment) {
-                        // 성공 시 리다이렉트 url을 받으므로, 이동
-                        location.href = fragment;
-                    },
-                    error: function (err) {
-                        console.log("요청 실패", err);
-                    }
-                });
-            }
-        }
-    </script>
 </main>
 </html>

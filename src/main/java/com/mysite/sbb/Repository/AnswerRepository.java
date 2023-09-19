@@ -25,7 +25,7 @@ public interface AnswerRepository extends JpaRepository<Answer, Integer> {
     @Query("SELECT e "
             + "FROM Answer e "
             + "WHERE e.question = :question "
-            + "ORDER BY SIZE(e.voter) DESC, e.createDate")
+            + "ORDER BY SIZE(e.voters) DESC, e.createDate")
     Page<Answer> findAllByQuestionOrderByVoter(@Param("question") Question question, Pageable pageable);
 
 

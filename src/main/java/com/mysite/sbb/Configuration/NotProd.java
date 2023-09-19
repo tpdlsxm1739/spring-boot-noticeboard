@@ -36,9 +36,9 @@ public class NotProd {
             public void run(String... args) throws Exception {
                 userService.create("admin","admin@test.com", "1234");
 
-                SiteUser user1 = userService.create("user1", "user1@test.com", passwordEncoder.encode("1234"));
-                SiteUser user2 = userService.create("user2", "user2@test.com", passwordEncoder.encode("1234"));
-                SiteUser user3 = userService.create("puar12", "r4560798@naver.com", passwordEncoder.encode("1234"));
+                SiteUser user1 = userService.create("user1", "user1@test.com", "1234");
+                SiteUser user2 = userService.create("user2", "user2@test.com", "1234");
+                SiteUser user3 = userService.create("puar12", "r4560798@naver.com", "1234");
 
                 List<Question> list = new ArrayList<>();
                 for (int i = 1; i <= 300; i++) {

@@ -59,7 +59,7 @@ public class AnswerService {
 
     @Transactional
     public void vote(Answer answer, SiteUser siteUser) {
-        answer.getVoter().add(siteUser);
+        answer.getVoters().add(siteUser);
         this.answerRepository.save(answer);
     }
 

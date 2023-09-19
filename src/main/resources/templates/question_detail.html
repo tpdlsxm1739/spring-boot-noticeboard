@@ -1,5 +1,5 @@
-<html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.w3.org/1999/xhtml">
-<div layout:fragment="content" class="container my-3">
+<html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml">
+<main layout:fragment="content" class="container my-3" id="questionDetail" xmlns:sec="http://www.w3.org/1999/xhtml">
     <!-- 질문 -->
     <h2 class="border-bottom py-2" th:text="${question.subject}"></h2>
     <div class="card my-3">
@@ -16,33 +16,55 @@
                     </div>
                     <div th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></div>
                 </div>
-                <div class="my-3">
-                    <a href="javascript:void(0);" class="recommend btn btn-sm btn-outline-secondary"
-                       th:data-uri="@{|/question/vote/${question.id}|}">추천
-                        <span class="badge rounded-pill bg-success" th:text="${#lists.size(question.voter)}">
-
-                </span></a>
-                    <a th:href="@{|/question/modify/${question.id}|}" class="btn btn-sm btn-outline-secondary"
-                       sec:authorize="isAuthenticated()"
-                       th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
-                       th:text="수정"></a>
-                    <a href="javascript:void(0);" th:data-uri="@{|/question/delete/${question.id}|}"
-                       class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
-                       th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
-                       th:text="삭제"></a>
+                <div class="badge bg-light text-dark p-2 text-start mx-3">
+                    <div class="mb-2">조회수</div>
+                    <div th:text="${question.view}" id="questionView"></div>
                 </div>
+            </div>
+            <div class="my-3">
+                <a onclick="return confirm('추천하시겠습니까?');" class="btn btn-sm btn-outline-secondary"
+                   th:href="@{|/question/vote/${question.id}|}">
+                    추천
+                    <span class="badge rounded-pill bg-success" th:text="${#sets.size(question.voters)}"></span>
+                </a>
+                <a th:href="@{|/question/modify/${question.id}|}" class="btn btn-sm btn-outline-secondary"
+                   sec:authorize="isAuthenticated()"
+                   th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
+                   th:text="수정"></a>
+                <form th:action="@{|/question/${question.id}|}" method="POST" style="display: inline">
+                    <input type="hidden" name="_method" value="delete">
+                    <button class="btn btn-sm btn-outline-secondary"
+                            th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
+                            th:text="삭제" sec:authorize="isAuthenticated()"
+                            onclick="return confirm('이 글을 삭제하시겠습니까?');">
+                    </button>
+                </form>
             </div>
         </div>
     </div>
     <!-- 답변의 갯수 표시 -->
     <div class="d-flex justify-content-between align-items-baseline">
-    <h5 class="border-bottom my-3 py-2"
-        th:text="|${#lists.size(question.answerList)}개의 답변이 있습니다.|">
-    </h5>
-</div>
+        <h5 class="border-bottom my-3 py-2"
+            th:text="|${#lists.size(question.answerList)}개의 답변이 있습니다.|">
+        </h5>
+        <div>
+            <ul class="nav d-flex align-items-baseline gap-2">
+                <span>정렬 기준</span>
+                <li class="nav-item">
+                    <a class="nav-link btn btn-primary text-white"
+                       th:classappend="${#strings.equals(param.sort, 'createDate')} ? 'active'"
+                       th:href="@{|?sort=createDate&page=${paging.number}|}">최신순</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn btn-primary text-white"
+                       th:classappend="${#strings.equals(param.sort, 'voter')} ? 'active'"
+                       th:href="@{|?sort=voter&page=${paging.number}|}">추천순</a>
+                </li>
+            </ul>
+        </div>
+    </div>
     <!-- 답변 반복 시작 -->
     <div th:id="|answer_${answer.id}|" class="card my-3" th:each="answer : ${paging}">
-        <a th:id="|answer_${answer.id}|"></a>
         <div class="card-body">
             <div class="card-text" th:utext="${@commonUtil.markdown(answer.content)}"></div>
             <div class="d-flex justify-content-end">
@@ -58,24 +80,28 @@
                 </div>
             </div>
             <div class="my-3">
-                <a href="javascript:void(0);" class="recommend btn btn-sm btn-outline-secondary"
-                   th:data-uri="@{|/question/vote/${question.id}|}">
+                <a onclick="return confirm('추천하시겠습니까?');" class="recommend btn btn-sm btn-outline-secondary"
+                   th:href="@{|/answer/vote/${answer.id}|}">
                     추천
-                    <span class="badge rounded-pill bg-success" th:text="${#lists.size(question.voter)}"></span>
+                    <span class="badge rounded-pill bg-success" th:text="${#sets.size(answer.voters)}"></span>
                 </a>
                 <a th:href="@{|/answer/modify/${answer.id}|}" class="btn btn-sm btn-outline-secondary"
                    sec:authorize="isAuthenticated()"
                    th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
                    th:text="수정"></a>
-                <a href="javascript:void(0);" th:data-uri="@{|/answer/delete/${answer.id}|}"
-                   class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
-                   th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
-                   th:text="삭제"></a>
+                <form th:action="@{|/answer/${answer.id}|}" method="POST" style="display: inline">
+                    <input type="hidden" name="_method" value="delete">
+                    <button class="btn btn-sm btn-outline-secondary"
+                            th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
+                            th:text="삭제" sec:authorize="isAuthenticated()"
+                            onclick="return confirm('이 글을 삭제하시겠습니까?');">
+                    </button>
+                </form>
             </div>
         </div>
     </div>
     <!-- 답변 반복 끝  -->
-<!--    답변 페이징처리 시작-->
+    <!-- 답변 페이징처리 시작 -->
     <div th:if="${!paging.isEmpty()}" th:with="queryStrBase = '?sort=' + ${param.sort != null ? param.sort : ''}">
         <ul class="pagination justify-content-center">
             <li class="page-item" th:classappend="${paging.number==0} ? 'disabled'">
@@ -109,119 +135,62 @@
             </li>
         </ul>
     </div>
-<!--    답변 페이징 처리 시작-->
-    <div th:if="${!paging.isEmpty()}" th:with="queryStrBase = '?kw=' + ${param.kw != null ? param.kw : ''}">
-        <ul class="pagination justify-content-center">
-            <li class="page-item" th:classappend="${paging.number==0} ? 'disabled'">
-                <a class="page-link"
-                   th:href="@{|${queryStrBase}&page=0|}">
-                    <span>처음</span>
-                </a>
-            </li>
-            <li class="page-item" th:classappend="${!paging.hasPrevious} ? 'disabled'">
-                <a class="page-link"
-                   th:href="@{|${queryStrBase}&page=${paging.number-1}|}">
-                    <span>이전</span>
-                </a>
-            </li>
-            <li th:each="page: ${#numbers.sequence(0, paging.totalPages-1)}"
-                th:if="${page >= paging.number-5 and page <= paging.number+5}"
-                th:classappend="${page == paging.number} ? 'active'"
-                class="page-item">
-                <a th:text="${page}" class="page-link" th:href="@{|${queryStrBase}&page=${page}|}"></a>
-            </li>
-            <li class="page-item" th:classappend="${!paging.hasNext} ? 'disabled'">
-                <a class="page-link" th:href="@{|${queryStrBase}&page=${paging.number+1}|}">
-                    <span>다음</span>
-                </a>
-            </li>
-            <li class="page-item" th:classappend="${paging.number==(paging.totalPages-1)} ? 'disabled'">
-                <a class="page-link"
-                   th:href="@{|${queryStrBase}&page=${paging.totalPages-1}|}">
-                    <span>끝</span>
-                </a>
-            </li>
-        </ul>
-    </div>
-
-<!--    답변 페이징처리 끝-->
-
+    <!-- 페이징처리 끝 -->
     <!-- 답변 작성 -->
     <form th:action="@{|/answer/create/${question.id}|}" th:object="${answerForm}" method="post" class="my-3">
         <div th:replace="~{form_errors :: formErrorsFragment}"></div>
-        <textarea sec:authorize="isAnonymous()" disabled th:field="*{content}" class="form-control" rows="10"></textarea>
-        <textarea sec:authorize="isAuthenticated()" th:field="*{content}" class="form-control" rows="10">
-
-        </textarea>
+        <textarea sec:authorize="isAnonymous()" disabled th:field="*{content}" class="form-control"
+                  rows="10"></textarea>
+        <textarea sec:authorize="isAuthenticated()" th:field="*{content}" class="form-control" rows="10"></textarea>
         <input sec:authorize="isAnonymous()" disabled type="submit" value="답변등록" class="btn btn-primary my-2">
-        <input sec:authorize="isAuthenticated()" type="submit" value="답변등록"  class="btn btn-primary my-2">
+        <input sec:authorize="isAuthenticated()" type="submit" value="답변등록" class="btn btn-primary my-2">
     </form>
-</div>
-<script th:inline="javascript">
-    window.onload = function () {
-        checkQuestionRead(); // html 로드 시 바로 Ajax 요청
-    };
-    // 로컬스토리지에 해당 게시글 읽은적이 있는지 검사
-    function checkIdInLocalStorage(id) {
-        const visitedPosts = JSON.parse(localStorage.getItem("visitedPosts") || "[]");
-        return visitedPosts.includes(id);
-    }
-    // 로컬스토리지에 방문 게시글 번호 추가
-    // null 일 경우 []값이 들어가고, push로 id넣고 새로 세팅(맨 처음)
-    function addIdToLocalStorage(id) {
-        const visitedPosts = JSON.parse(localStorage.getItem("visitedPosts") || "[]");
-        visitedPosts.push(id);
-        localStorage.setItem("visitedPosts", JSON.stringify(visitedPosts));
-    }
-    const checkQuestionRead = () => {
-        const questionId = [[${question.id}]];
-        // 방문 내역 검사
-        const isVisited = checkIdInLocalStorage(questionId);
-        // 방문하지 않았을 때만 추가하고 조회수 증가하도록
-        // true인 경우는 조건 제외함(요청 안보내도 되니)
-        if (!isVisited) {
-            addIdToLocalStorage(questionId);
-            $.ajax({
-                // 요청방식: get
-                type: "get",
-                url: "/question/increase",
-                data: {
-                    "questionId" : questionId,
-                    "isVisited" : isVisited,
-                    "questionId": questionId,
-                    "isVisited": isVisited
-                },
-                success: function (fragment) {
-                    $('#questionView').text(fragment);
-                },
-                error: function (err) {
-                    console.log("요청 실패", err);
-                }
-            });
-        }
-    }
-    // 마크다운에디터
-    var simplemde = new SimpleMDE({element: document.getElementById("content")});
-</script>
-</main>
+    <script th:inline="javascript">
+        window.onload = function () {
+            checkQuestionRead(); // html 로드 시 바로 Ajax 요청
+        };
 
-</html>
-<script layout:fragment="script" type='text/javascript'>
-    const delete_elements = document.getElementsByClassName("delete");
-    Array.from(delete_elements).forEach(function(element) {
-        element.addEventListener('click', function() {
-            if(confirm("정말로 삭제하시겠습니까?")) {
-                location.href = this.dataset.uri;
-            };
-        });
-    });
-    const recommend_elements = document.getElementsByClassName("recommend");
-    Array.from(recommend_elements).forEach(function(element){
-        element.addEventListener('click',function() {
-            if(confirm("정말로 추천하시겠습니까?")) {
-                location.href=this.dataset.uri;
-            };
-        });
-    });
-</script>
+        // 로컬스토리지에 해당 게시글 읽은적이 있는지 검사
+        function checkIdInLocalStorage(id) {
+            const visitedPosts = JSON.parse(localStorage.getItem("visitedPosts") || "[]");
+            return visitedPosts.includes(id);
+        }
+
+        // 로컬스토리지에 방문 게시글 번호 추가
+        // null 일 경우 []값이 들어가고, push로 id넣고 새로 세팅(맨 처음)
+        function addIdToLocalStorage(id) {
+            const visitedPosts = JSON.parse(localStorage.getItem("visitedPosts") || "[]");
+            visitedPosts.push(id);
+            localStorage.setItem("visitedPosts", JSON.stringify(visitedPosts));
+        }
+
+        const checkQuestionRead = () => {
+            const questionId = [[${question.id}]];
+            // 방문 내역 검사
+            const isVisited = checkIdInLocalStorage(questionId);
+            // 방문하지 않았을 때만 추가하고 조회수 증가하도록
+            // true인 경우는 조건 제외함(요청 안보내도 되니)
+            if (!isVisited) {
+                addIdToLocalStorage(questionId);
+                $.ajax({
+                    // 요청방식: get
+                    type: "get",
+                    url: "/question/increase",
+                    data: {
+                        "questionId": questionId,
+                        "isVisited": isVisited
+                    },
+                    success: function (fragment) {
+                        $('#questionView').text(fragment);
+                    },
+                    error: function (err) {
+                        console.log("요청 실패", err);
+                    }
+                });
+            }
+        }
+        // 마크다운에디터
+        var simplemde = new SimpleMDE({element: document.getElementById("content")});
+    </script>
+</main>
 </html>
